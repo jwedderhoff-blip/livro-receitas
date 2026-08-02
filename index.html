@@ -478,20 +478,22 @@ function parseHTML(html, url) {
 
 // ── FETCH ──
 async function fetchURL(url) {
+  const enc = encodeURIComponent(url);
   const proxies = [
-    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+    { url: `https://corsproxy.io/?url=${enc}`, json: false },
+    { url: `https://api.allorigins.win/get?url=${enc}`, json: true },
+    { url: `https://api.codetabs.com/v1/proxy?quest=${enc}`, json: false },
+    { url: `https://thingproxy.freeboard.io/fetch/${url}`, json: false },
   ];
   for (const p of proxies) {
     try {
-      const res = await fetch(p, {signal: AbortSignal.timeout(14000)});
+      const res = await fetch(p.url, {signal: AbortSignal.timeout(12000)});
       if (!res.ok) continue;
-      const data = await res.json();
-      const html = data.contents || data;
+      const html = p.json ? (await res.json()).contents : await res.text();
       if (typeof html === 'string' && html.length > 200) return html;
     } catch {}
   }
-  throw new Error('Não foi possível acessar o site. Verifique o link e tente novamente.');
+  throw new Error('Não foi possível acessar o site. Tente outro link ou site.');
 }
 
 function setStatus(type, msg) {
