@@ -536,9 +536,17 @@ function parseHTML(html, url) {
     }
   }
 
+  // Extract instruction text — prefer inner text span over full element (avoids step numbers)
+  function instrText(el) {
+    const inner = el.querySelector('[class*="text" i], [class*="txt" i], [class*="description" i], p');
+    const raw = inner ? norm(inner.textContent) : norm(el.textContent);
+    return raw.replace(/^\d+[\s.\):\-]+/, '').trim(); // strip leading "1." "2)" etc.
+  }
+
   let instr = [];
   const instrSelectors = [
-    '[itemprop="recipeInstructions"] li',
+    '[itemprop="recipeInstructions"]',
+    '[class*="recipeInstruction" i]',
     '[class*="instruction" i] li',
     '[class*="direction" i] li',
     '[class*="preparo" i] li',
@@ -552,7 +560,7 @@ function parseHTML(html, url) {
   for (const sel of instrSelectors) {
     const els = [...doc.querySelectorAll(sel)];
     if (els.length >= 2) {
-      const candidates = els.map(e => ({text: norm(e.textContent)})).filter(s => s.text.length > 15);
+      const candidates = els.map(e => ({text: instrText(e)})).filter(s => s.text.length > 15);
       if (candidates.length >= 2) { instr = candidates; break; }
     }
   }
@@ -571,17 +579,16 @@ function parseHTML(html, url) {
 async function fetchURL(url) {
   const enc = encodeURIComponent(url);
   const proxies = [
-    { url: `https://corsproxy.io/?url=${enc}`, json: false },
-    { url: `https://api.allorigins.win/get?url=${enc}`, json: true },
-    { url: `https://api.codetabs.com/v1/proxy?quest=${enc}`, json: false },
-    { url: `https://thingproxy.freeboard.io/fetch/${url}`, json: false },
+    { url: `https://proxy.cors.sh/${url}`,                  json: false, hdrs: {'x-requested-with':'XMLHttpRequest'} },
+    { url: `https://api.allorigins.win/get?url=${enc}`,     json: true,  hdrs: {} },
+    { url: `https://api.codetabs.com/v1/proxy?quest=${enc}`,json: false, hdrs: {} },
   ];
   for (const p of proxies) {
     try {
-      const res = await fetch(p.url, {signal: AbortSignal.timeout(12000)});
+      const res = await fetch(p.url, {signal: AbortSignal.timeout(14000), headers: p.hdrs});
       if (!res.ok) continue;
       const html = p.json ? (await res.json()).contents : await res.text();
-      if (typeof html === 'string' && html.length > 200) return html;
+      if (typeof html === 'string' && html.length > 500) return html;
     } catch {}
   }
   throw new Error('Não foi possível acessar o site. Tente outro link ou site.');
