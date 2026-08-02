@@ -353,12 +353,12 @@ a{color:var(--accent);text-decoration:none}
     </div>
     <!-- API key panel -->
     <div id="api-panel" style="display:none;padding:0 26px 14px;border-bottom:1px solid var(--rule)">
-      <label class="flbl" style="margin-top:12px;display:block">Chave de API do Google Gemini (gratuito)</label>
+      <label class="flbl" style="margin-top:12px;display:block">Chave de API do Groq (gratuito, sem cartão)</label>
       <div style="display:flex;gap:8px">
-        <input type="password" class="finput" id="api-inp" placeholder="AIza…" style="flex:1">
+        <input type="password" class="finput" id="api-inp" placeholder="gsk_…" style="flex:1">
         <button class="btn btn-p" onclick="saveApiKey()">Salvar</button>
       </div>
-      <p style="font-size:11px;color:var(--ink-3);margin-top:5px">Obtenha gratuitamente em <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> → "Create API key". Fica salva só no seu navegador.</p>
+      <p style="font-size:11px;color:var(--ink-3);margin-top:5px">Obtenha gratuitamente em <a href="https://console.groq.com/keys" target="_blank">console.groq.com/keys</a> → "Create API key". Fica salva só no seu navegador.</p>
     </div>
     <!-- Tabs -->
     <div style="display:flex;padding:14px 26px 0;border-bottom:1px solid var(--rule)">
@@ -842,35 +842,38 @@ function handlePhotoFile(file) {
 async function analysePhoto(dataUrl) {
   const key = localStorage.getItem(APIKEY_LS);
   if (!key) {
-    setStatusPhoto('err','Configure sua chave do Google Gemini primeiro (ícone ⚙).');
+    setStatusPhoto('err','Configure sua chave do Groq primeiro (ícone ⚙).');
     return;
   }
   setStatusPhoto('load','Analisando a imagem com IA…');
   document.getElementById('sbtn').style.display='none';
   try {
-    const mediaType = dataUrl.split(';')[0].split(':')[1];
-    const base64 = dataUrl.split(',')[1];
     const prompt = `Esta imagem contém uma receita culinária. Extraia e retorne um JSON com a seguinte estrutura EXATA (sem markdown, só JSON puro):
 {"name":"<nome da receita>","category":"<categoria: Massas, Aves, Carnes, Sobremesas, Sopas, Saladas, Peixes, Bebidas ou Outros>","servings":"<porções, ex: 4 porções>","time":"<tempo de preparo, ex: 30 min>","ingredients":["<item 1>","<item 2>"],"steps":["<passo 1>","<passo 2>"]}
 Se não conseguir identificar uma receita na imagem, retorne: {"error":"Não foi possível identificar uma receita nesta imagem."}`;
     const body = {
-      contents: [{
-        parts: [
-          { inline_data: { mime_type: mediaType, data: base64 } },
-          { text: prompt }
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image_url', image_url: { url: dataUrl } },
+          { type: 'text', text: prompt }
         ]
-      }]
+      }],
+      max_tokens: 2048
     };
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`,
-      { method: 'POST', headers: {'content-type':'application/json'}, body: JSON.stringify(body), signal: AbortSignal.timeout(30000) }
-    );
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(30000)
+    });
     if (!res.ok) {
       const err = await res.json().catch(()=>({}));
       throw new Error(err?.error?.message || `Erro ${res.status}`);
     }
     const data = await res.json();
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.choices?.[0]?.message?.content || '';
     let recipe;
     try {
       const jsonStr = text.replace(/^```[a-z]*\n?/,'').replace(/```$/,'').trim();
