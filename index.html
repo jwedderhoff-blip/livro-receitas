@@ -218,15 +218,6 @@ a{color:var(--accent);text-decoration:none}
 .prev-name{font-family:var(--font-d);font-size:16px;color:var(--ink);margin-bottom:3px}
 .prev-meta{font-size:11px;color:var(--ink-3)}
 
-/* ── MODAL TABS ── */
-.modal-tab{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--ink-3);border-bottom:2px solid transparent;border-radius:0;transition:color var(--ease),border-color var(--ease);margin-bottom:-1px}
-.modal-tab:hover{color:var(--ink)}
-.modal-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-
-/* ── DROP ZONE ── */
-#drop-zone{border:2px dashed var(--rule);border-radius:var(--r-lg);padding:28px 20px;text-align:center;cursor:pointer;transition:border-color var(--ease),background var(--ease);min-height:130px;display:flex;align-items:center;justify-content:center;flex-direction:column;position:relative}
-#drop-zone:hover,#drop-zone.drag-over{border-color:var(--accent);background:var(--accent-bg)}
-#drop-zone.has-image{padding:12px;border-style:solid}
 
 /* ── TOAST ── */
 #toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:var(--bg);padding:11px 17px;border-radius:var(--r);font-size:13px;z-index:100;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
@@ -339,41 +330,13 @@ a{color:var(--accent);text-decoration:none}
     <div class="modal-hdr">
       <div>
         <div class="modal-title">Adicionar receita</div>
+        <div class="modal-sub">Cole o link de qualquer site de culinária</div>
       </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button class="icon-btn" id="settings-btn" onclick="toggleSettings()" title="Configurar chave de API">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        </button>
-        <button class="icon-btn" onclick="closeModal()">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-    </div>
-
-    <!-- API key settings panel -->
-    <div id="settings-panel" style="display:none;padding:0 26px 16px;border-bottom:1px solid var(--rule)">
-      <label class="flbl" style="margin-top:12px;display:block">Chave de API do Claude (para captura por foto)</label>
-      <div style="display:flex;gap:8px">
-        <input type="password" class="finput" id="api-key-input" placeholder="sk-ant-…" style="flex:1">
-        <button class="btn btn-p" onclick="saveApiKey()">Salvar</button>
-      </div>
-      <p style="font-size:11px;color:var(--ink-3);margin-top:6px">Obtenha sua chave em <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Fica salva só no seu navegador.</p>
-    </div>
-
-    <!-- Tab switcher -->
-    <div style="display:flex;gap:0;padding:16px 26px 0;border-bottom:1px solid var(--rule)">
-      <button class="modal-tab active" id="tab-url" onclick="switchTab('url')">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Por link
-      </button>
-      <button class="modal-tab" id="tab-photo" onclick="switchTab('photo')">
-        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-        Por foto
+      <button class="icon-btn" onclick="closeModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-
-    <!-- URL tab -->
-    <div class="modal-body" id="body-url">
+    <div class="modal-body">
       <label class="flbl" for="rurl">URL da receita</label>
       <div style="display:flex;gap:8px">
         <input type="url" class="finput" id="rurl" placeholder="https://…" style="flex:1" oninput="resetFetch()">
@@ -385,25 +348,6 @@ a{color:var(--accent);text-decoration:none}
         <div class="prev-meta" id="prev-meta"></div>
       </div>
     </div>
-
-    <!-- Photo tab -->
-    <div class="modal-body" id="body-photo" style="display:none">
-      <div id="drop-zone" onclick="document.getElementById('photo-input').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
-        <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoFile(this.files[0])">
-        <div id="drop-inner">
-          <div style="font-size:36px;margin-bottom:10px">📷</div>
-          <div style="font-size:14px;color:var(--ink-2);font-weight:500">Clique ou arraste uma foto aqui</div>
-          <div style="font-size:12px;color:var(--ink-3);margin-top:4px">Foto da receita, print de tela, página de livro…</div>
-        </div>
-        <img id="photo-preview-img" style="display:none;max-width:100%;max-height:200px;border-radius:4px;object-fit:contain">
-      </div>
-      <div class="fstatus" id="fstatus-photo"></div>
-      <div class="preview-box" id="prev-box-photo">
-        <div class="prev-name" id="prev-name-photo"></div>
-        <div class="prev-meta" id="prev-meta-photo"></div>
-      </div>
-    </div>
-
     <div class="modal-foot">
       <button class="btn btn-g" onclick="closeModal()">Cancelar</button>
       <button class="btn btn-p" id="sbtn" style="display:none" onclick="saveRecipe()">Salvar receita</button>
@@ -452,108 +396,175 @@ function extractImage(img) {
   if (Array.isArray(img)) return extractImage(img[0]);
   return img.url || img.contentUrl || null;
 }
+
 function extractIngredients(arr) {
   if (!arr) return [];
-  if (Array.isArray(arr)) return arr.map(i => {
-    if (typeof i === 'string') return i.trim();
-    // Some sites put quantity in a separate field
+  if (typeof arr === 'string') return arr.split(/\n|;/).map(s=>s.trim()).filter(Boolean);
+  if (!Array.isArray(arr)) return [];
+  return arr.map(i => {
+    if (typeof i === 'string') return i.replace(/\s+/g,' ').trim();
     const qty = i.requiredQuantity || i.amount || '';
     const name = i.text || i.name || '';
-    if (qty && name) return `${qty} ${name}`.trim();
-    return (name || qty || '').trim();
+    return qty && name ? `${qty} ${name}`.trim() : (name || qty || '').trim();
   }).filter(Boolean);
-  if (typeof arr === 'string') return arr.split(/\n|;/).map(s=>s.trim()).filter(Boolean);
-  return [];
 }
+
 function extractInstructions(steps) {
   if (!steps) return [];
-  if (typeof steps === 'string') return [{text:steps}];
+  if (typeof steps === 'string') return [{text: steps.trim()}];
   if (!Array.isArray(steps)) return [];
   const out = [];
   for (const s of steps) {
-    if (typeof s === 'string') { out.push({text:s}); continue; }
-    if (s['@type']==='HowToSection' || s.itemListElement) {
-      if (s.name) out.push({type:'sec',name:s.name});
-      for (const x of (s.itemListElement||[])) out.push({text: typeof x==='string'?x:(x.text||x.name||'')});
+    if (typeof s === 'string') { if (s.trim()) out.push({text:s.trim()}); continue; }
+    const type = s['@type'];
+    if (type === 'HowToSection' || s.itemListElement) {
+      if (s.name) out.push({type:'sec', name:s.name});
+      for (const x of (s.itemListElement||[])) {
+        const txt = typeof x==='string' ? x : (x.text||x.name||'');
+        if (txt.trim()) out.push({text:txt.trim()});
+      }
     } else {
-      const txt = s.text||s.name||'';
-      if (txt) out.push({text:txt});
+      const txt = s.text || s.name || '';
+      if (txt.trim()) out.push({text:txt.trim()});
     }
   }
-  return out.filter(s => s.text||s.type==='sec');
+  return out.filter(s => s.text || s.type==='sec');
 }
-function schemaToRecipe(data, url) {
-  let r = data;
-  if (data['@graph']) r = data['@graph'].find(x => x['@type']==='Recipe'||(Array.isArray(x['@type'])&&x['@type'].includes('Recipe')));
-  if (Array.isArray(r)) r = r.find(x => x['@type']==='Recipe'||(Array.isArray(x['@type'])&&x['@type'].includes('Recipe')));
+
+function isRecipeType(t) {
+  if (!t) return false;
+  if (t === 'Recipe') return true;
+  if (Array.isArray(t)) return t.includes('Recipe');
+  if (typeof t === 'string') return t.endsWith('Recipe');
+  return false;
+}
+
+function findRecipeNode(data) {
+  if (!data) return null;
+  // Array at root level
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      const found = findRecipeNode(item);
+      if (found) return found;
+    }
+    return null;
+  }
+  // Direct Recipe
+  if (isRecipeType(data['@type'])) return data;
+  // @graph array
+  if (Array.isArray(data['@graph'])) {
+    for (const item of data['@graph']) {
+      if (isRecipeType(item['@type'])) return item;
+    }
+  }
+  return null;
+}
+
+function schemaToRecipe(raw, url) {
+  // Sanitize: remove BOM, CDATA wrappers, trailing commas
+  let text = raw.replace(/^﻿/, '')
+                .replace(/^\/\/<!\[CDATA\[/, '').replace(/\/\/\]\]>$/, '')
+                .replace(/,\s*([\]}])/g, '$1');
+  let data;
+  try { data = JSON.parse(text); } catch { return null; }
+  const r = findRecipeNode(data);
   if (!r) return null;
-  const t = r['@type'];
-  if (t!=='Recipe' && !(Array.isArray(t)&&t.includes('Recipe'))) return null;
+
   const kw = r.keywords;
   let tags = [];
   if (typeof kw==='string') tags = kw.split(',').map(t=>t.trim()).filter(Boolean);
-  else if (Array.isArray(kw)) tags = kw;
-  const cat = r.recipeCategory;
-  const cui = r.recipeCuisine;
+  else if (Array.isArray(kw)) tags = kw.map(String);
+
+  const first = v => Array.isArray(v) ? v[0] : v;
+
   return {
     id: Date.now()+Math.random(), url,
-    name: r.name||'Receita',
-    description: r.description||'',
+    name: (r.name||'Receita').trim(),
+    description: (r.description||'').trim(),
     image: extractImage(r.image),
     ingredients: extractIngredients(r.recipeIngredient),
     instructions: extractInstructions(r.recipeInstructions),
     prepTime: iso2dur(r.prepTime),
     cookTime: iso2dur(r.cookTime),
     totalTime: iso2dur(r.totalTime),
-    servings: r.recipeYield ? (Array.isArray(r.recipeYield)?r.recipeYield[0]:r.recipeYield) : null,
-    category: cat ? (Array.isArray(cat)?cat[0]:cat) : '',
-    cuisine: cui ? (Array.isArray(cui)?cui[0]:cui) : '',
+    servings: r.recipeYield ? String(first(r.recipeYield)) : null,
+    category: r.recipeCategory ? String(first(r.recipeCategory)) : '',
+    cuisine: r.recipeCuisine ? String(first(r.recipeCuisine)) : '',
     tags, addedAt: new Date().toISOString()
   };
 }
+
 function parseHTML(html, url) {
-  const doc = new DOMParser().parseFromString(html,'text/html');
-  // JSON-LD pass
-  for (const s of doc.querySelectorAll('script[type="application/ld+json"]')) {
-    try {
-      const r = schemaToRecipe(JSON.parse(s.textContent), url);
-      if (r) return r;
-    } catch {}
-  }
-  // Heuristic fallback
-  const title = doc.querySelector('h1')?.textContent?.trim()||'Receita';
-  const img = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
-  const desc = doc.querySelector('meta[name="description"]')?.getAttribute('content')||
-               doc.querySelector('meta[property="og:description"]')?.getAttribute('content')||'';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
   const norm = s => s.replace(/\s+/g,' ').trim();
+
+  // 1. JSON-LD scripts (try all, not just first match)
+  const scripts = doc.querySelectorAll('script[type="application/ld+json"], script[type="application/json"]');
+  for (const s of scripts) {
+    const r = schemaToRecipe(s.textContent, url);
+    if (r && r.ingredients.length > 0) return r;
+  }
+  // 2. Try without ingredient check (some sites have them but list is short)
+  for (const s of scripts) {
+    const r = schemaToRecipe(s.textContent, url);
+    if (r) return r;
+  }
+
+  // 3. Heuristic fallback — microdata + class selectors
+  const title = doc.querySelector('h1')?.textContent?.trim() || 'Receita';
+  const img   = doc.querySelector('meta[property="og:image"]')?.getAttribute('content') || null;
+  const desc  = doc.querySelector('meta[name="description"]')?.getAttribute('content') ||
+                doc.querySelector('meta[property="og:description"]')?.getAttribute('content') || '';
+
   let ingr = [];
-  for (const sel of [
+  const ingrSelectors = [
     '[itemprop="recipeIngredient"]',
-    '[class*="ingredient" i]','[class*="ingrediente" i]',
-    '[class*="Ingredient"]',
-    'li[class*="item" i]',
-  ]) {
+    '[data-ingredient]',
+    '[class*="ingredient" i] li',
+    '[class*="ingrediente" i] li',
+    'ul[class*="ingredient" i] > li',
+    'ul[class*="ingrediente" i] > li',
+    '[class*="ingredient-item" i]',
+    '[class*="ingrediente-item" i]',
+    '[class*="recipe-ingredient" i]',
+  ];
+  for (const sel of ingrSelectors) {
     const els = [...doc.querySelectorAll(sel)];
-    if (els.length > 1) {
-      ingr = els.map(e => norm(e.textContent)).filter(s => s.length > 1 && s.length < 300);
-      if (ingr.length > 1) break;
+    if (els.length >= 2) {
+      const candidates = els.map(e => norm(e.textContent)).filter(s => s.length > 1 && s.length < 250);
+      if (candidates.length >= 2) { ingr = candidates; break; }
     }
   }
+
   let instr = [];
-  for (const sel of [
-    '[itemprop="recipeInstructions"]',
-    '[class*="instruction" i]','[class*="preparo" i]','[class*="prepara" i]',
-    '[class*="direction" i]','[class*="step" i]','[class*="passo" i]',
-  ]) {
+  const instrSelectors = [
+    '[itemprop="recipeInstructions"] li',
+    '[class*="instruction" i] li',
+    '[class*="direction" i] li',
+    '[class*="preparo" i] li',
+    '[class*="prepara" i] li',
+    '[class*="step" i][class*="text" i]',
+    '[class*="step-description" i]',
+    '[class*="passo" i]',
+    'ol[class*="instruction" i] > li',
+    'ol[class*="step" i] > li',
+  ];
+  for (const sel of instrSelectors) {
     const els = [...doc.querySelectorAll(sel)];
-    if (els.length > 1) {
-      instr = els.map(e => ({text: norm(e.textContent)})).filter(s => s.text.length > 10);
-      if (instr.length > 1) break;
+    if (els.length >= 2) {
+      const candidates = els.map(e => ({text: norm(e.textContent)})).filter(s => s.text.length > 15);
+      if (candidates.length >= 2) { instr = candidates; break; }
     }
   }
-  return {id:Date.now()+Math.random(),url,name:title,description:desc,image:img,
-    ingredients:ingr,instructions:instr,prepTime:null,cookTime:null,totalTime:null,
-    servings:null,category:'',cuisine:'',tags:[],addedAt:new Date().toISOString(),heuristic:true};
+
+  return {
+    id: Date.now()+Math.random(), url,
+    name: title, description: desc, image: img,
+    ingredients: ingr, instructions: instr,
+    prepTime: null, cookTime: null, totalTime: null,
+    servings: null, category: '', cuisine: '', tags: [],
+    addedAt: new Date().toISOString(), heuristic: true
+  };
 }
 
 // ── FETCH ──
@@ -620,190 +631,16 @@ function resetFetch() {
   document.getElementById('sbtn').style.display='none';
 }
 
-// ── API KEY ──
-function getApiKey() { return localStorage.getItem('cookbook-apikey') || ''; }
-function saveApiKey() {
-  const k = document.getElementById('api-key-input').value.trim();
-  if (!k) { alert('Cole sua chave de API.'); return; }
-  localStorage.setItem('cookbook-apikey', k);
-  document.getElementById('settings-panel').style.display = 'none';
-  toast('Chave salva com sucesso!');
-}
-function toggleSettings() {
-  const p = document.getElementById('settings-panel');
-  const open = p.style.display !== 'none';
-  p.style.display = open ? 'none' : 'block';
-  if (!open) document.getElementById('api-key-input').value = getApiKey();
-}
-
-// ── TABS ──
-let activeTab = 'url';
-function switchTab(tab) {
-  activeTab = tab;
-  document.getElementById('tab-url').classList.toggle('active', tab === 'url');
-  document.getElementById('tab-photo').classList.toggle('active', tab === 'photo');
-  document.getElementById('body-url').style.display = tab === 'url' ? '' : 'none';
-  document.getElementById('body-photo').style.display = tab === 'photo' ? '' : 'none';
-  document.getElementById('sbtn').style.display = 'none';
-  pending = null;
-}
-
-// ── PHOTO CAPTURE ──
-let photoData = null;
-
-function handleDrop(e) {
-  e.preventDefault();
-  document.getElementById('drop-zone').classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file && file.type.startsWith('image/')) handlePhotoFile(file);
-}
-
-function handlePhotoFile(file) {
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const dataUrl = e.target.result;
-    // Show preview
-    const img = document.getElementById('photo-preview-img');
-    img.src = dataUrl;
-    img.style.display = 'block';
-    document.getElementById('drop-inner').style.display = 'none';
-    document.getElementById('drop-zone').classList.add('has-image');
-    // Store base64
-    const base64 = dataUrl.split(',')[1];
-    const mime = file.type;
-    photoData = { base64, mime };
-    // Reset status
-    document.getElementById('fstatus-photo').innerHTML = '';
-    document.getElementById('prev-box-photo').classList.remove('show');
-    document.getElementById('sbtn').style.display = 'none';
-    // Auto-analyse
-    analysePhoto();
-  };
-  reader.readAsDataURL(file);
-}
-
-async function analysePhoto() {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    setStatusPhoto('err', 'Configure sua chave de API clicando no ⚙️ acima.');
-    document.getElementById('settings-panel').style.display = 'block';
-    document.getElementById('api-key-input').value = '';
-    return;
-  }
-  if (!photoData) return;
-
-  setStatusPhoto('loading', 'Analisando imagem com IA…');
-
-  const prompt = `Você é um assistente especialista em culinária. Analise esta imagem e extraia todos os dados da receita visível.
-Retorne SOMENTE um objeto JSON válido, sem explicações, com esta estrutura exata:
-{
-  "name": "nome da receita",
-  "description": "breve descrição",
-  "ingredients": ["quantidade + ingrediente", "..."],
-  "instructions": ["passo 1", "passo 2", "..."],
-  "prepTime": "Xmin ou Xh Ymin ou null",
-  "cookTime": "Xmin ou null",
-  "totalTime": "Xmin ou null",
-  "servings": "X porções ou null",
-  "category": "categoria ou null"
-}
-Inclua as quantidades completas nos ingredientes (ex: "2 xícaras de farinha de trigo"). Se não conseguir ler algo, use null ou array vazio.`;
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1500,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: photoData.mime, data: photoData.base64 } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error?.message || `Erro ${res.status} na API.`);
-    }
-
-    const data = await res.json();
-    const text = data.content?.[0]?.text || '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('A IA não retornou dados estruturados. Tente outra imagem.');
-
-    const parsed = JSON.parse(jsonMatch[0]);
-    if (!parsed.name && !parsed.ingredients?.length) throw new Error('Não consegui identificar uma receita nessa imagem.');
-
-    pending = {
-      id: Date.now() + Math.random(),
-      url: '',
-      name: parsed.name || 'Receita da foto',
-      description: parsed.description || '',
-      image: null,
-      ingredients: Array.isArray(parsed.ingredients) ? parsed.ingredients : [],
-      instructions: Array.isArray(parsed.instructions) ? parsed.instructions.map(t => ({ text: t })) : [],
-      prepTime: parsed.prepTime || null,
-      cookTime: parsed.cookTime || null,
-      totalTime: parsed.totalTime || null,
-      servings: parsed.servings || null,
-      category: parsed.category || '',
-      cuisine: '',
-      tags: [],
-      addedAt: new Date().toISOString(),
-      fromPhoto: true,
-    };
-
-    setStatusPhoto('ok', `Receita identificada!`);
-    document.getElementById('prev-name-photo').textContent = pending.name;
-    const m = [pending.ingredients.length && `${pending.ingredients.length} ingredientes`,
-               pending.instructions.length && `${pending.instructions.length} passos`,
-               pending.totalTime].filter(Boolean).join(' · ');
-    document.getElementById('prev-meta-photo').textContent = m;
-    document.getElementById('prev-box-photo').classList.add('show');
-    document.getElementById('sbtn').style.display = '';
-
-  } catch(e) {
-    setStatusPhoto('err', e.message || 'Erro ao analisar a imagem.');
-  }
-}
-
-function setStatusPhoto(type, msg) {
-  const el = document.getElementById('fstatus-photo');
-  const pfx = type==='loading'?'<span class="spin"></span>':type==='err'?'⚠ ':'✓ ';
-  el.className = 'fstatus'+(type==='err'?' ferr':type==='ok'?' fok':'');
-  el.innerHTML = pfx + esc(msg);
-}
-
 // ── MODAL ──
 function openModal() {
   document.getElementById('overlay').classList.add('open');
   document.getElementById('rurl').value='';
   resetFetch();
-  // Reset photo tab
-  photoData = null;
-  document.getElementById('photo-preview-img').style.display = 'none';
-  document.getElementById('drop-inner').style.display = '';
-  document.getElementById('drop-zone').classList.remove('has-image');
-  document.getElementById('fstatus-photo').innerHTML = '';
-  document.getElementById('prev-box-photo').classList.remove('show');
-  document.getElementById('settings-panel').style.display = 'none';
-  switchTab('url');
   setTimeout(()=>document.getElementById('rurl').focus(),60);
 }
 function closeModal() {
   document.getElementById('overlay').classList.remove('open');
-  pending=null; photoData=null;
+  pending=null;
 }
 function saveRecipe() {
   if (!pending) return;
