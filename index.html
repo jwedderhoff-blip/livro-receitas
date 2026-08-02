@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Livro de Receitas</title>
+<title>Livro de Receitas de Família</title>
 <style>
 :root {
   --bg: #F0EDE4;
@@ -219,9 +219,20 @@ a{color:var(--accent);text-decoration:none}
 .prev-meta{font-size:11px;color:var(--ink-3)}
 
 
+/* ── MODAL TABS ── */
+.mtab{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--ink-3);border-bottom:2px solid transparent;transition:color var(--ease),border-color var(--ease);margin-bottom:-1px}
+.mtab:hover{color:var(--ink)}
+.mtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* ── DROP ZONE ── */
+#drop-zone{border:2px dashed var(--rule);border-radius:var(--r-lg);padding:28px 20px;text-align:center;cursor:pointer;transition:border-color var(--ease),background var(--ease);min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column}
+#drop-zone:hover,#drop-zone.drag-over{border-color:var(--accent);background:var(--accent-bg)}
+#drop-zone.has-img{padding:10px;border-style:solid}
 /* ── TOAST ── */
-#toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:var(--bg);padding:11px 17px;border-radius:var(--r);font-size:13px;z-index:100;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
-#toast.show{opacity:1;transform:none}
+#toast{position:fixed;bottom:22px;right:22px;background:var(--ink);color:var(--bg);padding:11px 17px;border-radius:var(--r);font-size:13px;z-index:100;opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none;display:flex;align-items:center;gap:14px;max-width:360px}
+#toast.show{opacity:1;transform:none;pointer-events:auto}
+#toast-undo{background:none;border:none;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;padding:0;font-family:inherit;flex-shrink:0;letter-spacing:.03em}
+#toast-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--accent);border-radius:0 0 var(--r) var(--r);transition:width linear}
+#toast-msg{flex:1}
 
 /* ── RESPONSIVE ── */
 @media(max-width:680px){
@@ -245,7 +256,7 @@ a{color:var(--accent);text-decoration:none}
     <div class="sb-logo">
       <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="12" y1="6" x2="16" y2="6"/><line x1="12" y1="10" x2="16" y2="10"/></svg>
     </div>
-    <div class="spine-txt">Livro de Receitas</div>
+    <div class="spine-txt">Livro de Receitas de Família</div>
     <nav class="sb-nav">
       <button class="nb active" id="nb-lib" title="Biblioteca" onclick="showLibrary()">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
@@ -330,23 +341,59 @@ a{color:var(--accent);text-decoration:none}
     <div class="modal-hdr">
       <div>
         <div class="modal-title">Adicionar receita</div>
-        <div class="modal-sub">Cole o link de qualquer site de culinária</div>
       </div>
-      <button class="icon-btn" onclick="closeModal()">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <div style="display:flex;gap:4px;align-items:center">
+        <button class="icon-btn" id="btn-apikey" onclick="toggleApiPanel()" title="Chave de API (para captura por foto)">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" onclick="closeModal()">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- API key panel -->
+    <div id="api-panel" style="display:none;padding:0 26px 14px;border-bottom:1px solid var(--rule)">
+      <label class="flbl" style="margin-top:12px;display:block">Chave de API do Claude</label>
+      <div style="display:flex;gap:8px">
+        <input type="password" class="finput" id="api-inp" placeholder="sk-ant-…" style="flex:1">
+        <button class="btn btn-p" onclick="saveApiKey()">Salvar</button>
+      </div>
+      <p style="font-size:11px;color:var(--ink-3);margin-top:5px">Obtenha gratuitamente em <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Fica salva só no seu navegador.</p>
+    </div>
+    <!-- Tabs -->
+    <div style="display:flex;padding:14px 26px 0;border-bottom:1px solid var(--rule)">
+      <button class="mtab active" id="tab-url" onclick="switchTab('url')">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Por link
+      </button>
+      <button class="mtab" id="tab-photo" onclick="switchTab('photo')">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Por foto
       </button>
     </div>
-    <div class="modal-body">
+    <!-- URL body -->
+    <div class="modal-body" id="body-url">
       <label class="flbl" for="rurl">URL da receita</label>
       <div style="display:flex;gap:8px">
         <input type="url" class="finput" id="rurl" placeholder="https://…" style="flex:1" oninput="resetFetch()">
         <button class="btn btn-p" id="fbtn" onclick="doFetch()">Buscar</button>
       </div>
       <div class="fstatus" id="fstatus"></div>
-      <div class="preview-box" id="prev-box">
-        <div class="prev-name" id="prev-name"></div>
-        <div class="prev-meta" id="prev-meta"></div>
+      <div class="preview-box" id="prev-box"><div class="prev-name" id="prev-name"></div><div class="prev-meta" id="prev-meta"></div></div>
+    </div>
+    <!-- Photo body -->
+    <div class="modal-body" id="body-photo" style="display:none">
+      <div id="drop-zone" onclick="document.getElementById('photo-inp').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)">
+        <input type="file" id="photo-inp" accept="image/*" style="display:none" onchange="handlePhotoFile(this.files[0])">
+        <div id="drop-inner">
+          <div style="font-size:34px;margin-bottom:8px">📷</div>
+          <div style="font-size:13px;color:var(--ink-2);font-weight:500">Clique ou arraste uma foto aqui</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:3px">Foto de receita, print, página de livro…</div>
+        </div>
+        <img id="photo-prev-img" style="display:none;max-width:100%;max-height:190px;border-radius:4px;object-fit:contain">
       </div>
+      <div class="fstatus" id="fstatus-photo"></div>
+      <div class="preview-box" id="prev-box-photo"><div class="prev-name" id="prev-name-photo"></div><div class="prev-meta" id="prev-meta-photo"></div></div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-g" onclick="closeModal()">Cancelar</button>
@@ -355,7 +402,11 @@ a{color:var(--accent);text-decoration:none}
   </div>
 </div>
 
-<div id="toast"></div>
+<div id="toast" style="position:relative">
+  <span id="toast-msg"></span>
+  <button id="toast-undo" style="display:none" onclick="undoDelete()">DESFAZER</button>
+  <div id="toast-bar" style="width:100%"></div>
+</div>
 
 <script>
 // ── STATE ──
@@ -363,8 +414,40 @@ let recipes = [], filter = 'all', query = '', pending = null, openId = null;
 
 // ── STORAGE ──
 const LS = 'cookbook-v1';
-function load() { try { recipes = JSON.parse(localStorage.getItem(LS)) || []; } catch { recipes = []; } }
-function save() { localStorage.setItem(LS, JSON.stringify(recipes)); }
+function load() {
+  try {
+    recipes = JSON.parse(localStorage.getItem(LS)) || [];
+    for (const r of recipes) {
+      const cached = localStorage.getItem(`cookbook-img-${r.id}`);
+      if (cached) r.imageData = cached;
+    }
+  } catch { recipes = []; }
+}
+function save() { localStorage.setItem(LS, JSON.stringify(recipes.map(r => { const {imageData,...rest}=r; return rest; }))); }
+
+// ── IMAGE CACHE ──
+async function cacheImage(recipe) {
+  if (!recipe.image) return;
+  try {
+    const res = await fetch(`https://proxy.cors.sh/${recipe.image}`, {
+      headers: {'x-requested-with': 'XMLHttpRequest'},
+      signal: AbortSignal.timeout(12000)
+    });
+    if (!res.ok) return;
+    const blob = await res.blob();
+    const bitmap = await createImageBitmap(blob);
+    const maxW = 420;
+    const scale = Math.min(1, maxW / bitmap.width);
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+    localStorage.setItem(`cookbook-img-${recipe.id}`, dataUrl);
+    recipe.imageData = dataUrl;
+    renderGrid(); // refresh cards with cached image
+  } catch {}
+}
 
 // ── UTILS ──
 function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
@@ -383,10 +466,42 @@ function emoji(cat) {
   for (const [k,v] of Object.entries(mp)) if (c.includes(k)) return v;
   return '🍽️';
 }
+let _toastTimer = null;
 function toast(msg) {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-undo').style.display = 'none';
+  document.getElementById('toast-bar').style.transition = 'none';
+  document.getElementById('toast-bar').style.width = '0';
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+let _undoPending = null;
+function showUndoToast(name) {
+  const DELAY = 6000;
+  const t = document.getElementById('toast');
+  const bar = document.getElementById('toast-bar');
+  document.getElementById('toast-msg').textContent = `"${name}" removida.`;
+  document.getElementById('toast-undo').style.display = '';
+  clearTimeout(_toastTimer);
+  t.classList.add('show');
+  // Animate progress bar shrinking
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    bar.style.transition = `width ${DELAY}ms linear`;
+    bar.style.width = '0%';
+  }));
+  _toastTimer = setTimeout(() => {
+    t.classList.remove('show');
+    if (_undoPending) {
+      // Permanent delete — clean up cached image
+      localStorage.removeItem(`cookbook-img-${_undoPending.recipe.id}`);
+      _undoPending = null;
+    }
+  }, DELAY);
 }
 
 // ── PARSE SCHEMA.ORG ──
@@ -639,23 +754,171 @@ function resetFetch() {
 }
 
 // ── MODAL ──
+const APIKEY_LS = 'cookbook-apikey';
 function openModal() {
   document.getElementById('overlay').classList.add('open');
   document.getElementById('rurl').value='';
   resetFetch();
+  switchTab('url');
+  document.getElementById('api-panel').style.display='none';
+  // pre-fill saved key (masked)
+  const k = localStorage.getItem(APIKEY_LS)||'';
+  document.getElementById('api-inp').value = k ? '•'.repeat(Math.min(k.length,32)) : '';
   setTimeout(()=>document.getElementById('rurl').focus(),60);
 }
 function closeModal() {
   document.getElementById('overlay').classList.remove('open');
   pending=null;
 }
+function toggleApiPanel() {
+  const p = document.getElementById('api-panel');
+  const showing = p.style.display !== 'none';
+  p.style.display = showing ? 'none' : 'block';
+  if (!showing) {
+    const k = localStorage.getItem(APIKEY_LS)||'';
+    document.getElementById('api-inp').value = k ? '•'.repeat(Math.min(k.length,32)) : '';
+    setTimeout(()=>document.getElementById('api-inp').focus(),60);
+  }
+}
+function saveApiKey() {
+  const inp = document.getElementById('api-inp');
+  const v = inp.value.trim();
+  if (v && !v.startsWith('•')) {
+    localStorage.setItem(APIKEY_LS, v);
+    toast('Chave de API salva!');
+  }
+  document.getElementById('api-panel').style.display='none';
+}
+function switchTab(tab) {
+  document.getElementById('tab-url').classList.toggle('active', tab==='url');
+  document.getElementById('tab-photo').classList.toggle('active', tab==='photo');
+  document.getElementById('body-url').style.display = tab==='url' ? '' : 'none';
+  document.getElementById('body-photo').style.display = tab==='photo' ? '' : 'none';
+  if (tab==='url') {
+    resetFetch();
+    setTimeout(()=>document.getElementById('rurl').focus(),60);
+  } else {
+    resetPhoto();
+  }
+}
+// ── PHOTO TAB ──
+let photoPending = null;
+function resetPhoto() {
+  photoPending = null;
+  setStatusPhoto('');
+  document.getElementById('prev-box-photo').style.display='none';
+  document.getElementById('prev-name-photo').textContent='';
+  document.getElementById('prev-meta-photo').textContent='';
+  document.getElementById('sbtn').style.display='none';
+  document.getElementById('photo-prev-img').style.display='none';
+  document.getElementById('drop-inner').style.display='';
+  document.getElementById('photo-inp').value='';
+}
+function setStatusPhoto(type, msg) {
+  const el = document.getElementById('fstatus-photo');
+  el.className = 'fstatus' + (type ? ' st-'+type : '');
+  el.textContent = msg||'';
+}
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) handlePhotoFile(file);
+}
+function handlePhotoFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    const dataUrl = ev.target.result;
+    // show thumb
+    const img = document.getElementById('photo-prev-img');
+    img.src = dataUrl;
+    img.style.display = 'block';
+    document.getElementById('drop-inner').style.display='none';
+    await analysePhoto(dataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+async function analysePhoto(dataUrl) {
+  const key = localStorage.getItem(APIKEY_LS);
+  if (!key) {
+    setStatusPhoto('err','Configure sua chave de API Claude primeiro (ícone ⚙).');
+    return;
+  }
+  setStatusPhoto('load','Analisando a imagem com IA…');
+  document.getElementById('sbtn').style.display='none';
+  try {
+    const mediaType = dataUrl.split(';')[0].split(':')[1];
+    const base64 = dataUrl.split(',')[1];
+    const body = {
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 2048,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'image', source: { type: 'base64', media_type: mediaType, data: base64 } },
+          { type: 'text', text: `Esta imagem contém uma receita culinária. Extraia e retorne um JSON com a seguinte estrutura EXATA (sem markdown, só JSON puro):
+{"name":"<nome da receita>","category":"<categoria: Massas, Aves, Carnes, Sobremesas, Sopas, Saladas, Peixes, Bebidas ou Outros>","servings":"<porções, ex: 4 porções>","time":"<tempo de preparo, ex: 30 min>","ingredients":["<item 1>","<item 2>"],"steps":["<passo 1>","<passo 2>"]}
+Se não conseguir identificar uma receita na imagem, retorne: {"error":"Não foi possível identificar uma receita nesta imagem."}`}
+        ]
+      }]
+    };
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type':'application/json',
+        'x-api-key': key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(30000)
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err?.error?.message || `Erro ${res.status}`);
+    }
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    let recipe;
+    try {
+      const jsonStr = text.replace(/^```[a-z]*\n?/,'').replace(/```$/,'').trim();
+      recipe = JSON.parse(jsonStr);
+    } catch {
+      throw new Error('A IA não retornou um formato válido. Tente outra imagem.');
+    }
+    if (recipe.error) throw new Error(recipe.error);
+    photoPending = {
+      id: Date.now(),
+      name: recipe.name || 'Receita sem nome',
+      category: recipe.category || 'Outros',
+      servings: recipe.servings || '',
+      time: recipe.time || '',
+      ingredients: Array.isArray(recipe.ingredients) ? recipe.ingredients : [],
+      steps: Array.isArray(recipe.steps) ? recipe.steps : [],
+      image: '',
+      url: ''
+    };
+    pending = photoPending;
+    document.getElementById('prev-name-photo').textContent = photoPending.name;
+    const meta = [photoPending.category, photoPending.servings, photoPending.time].filter(Boolean).join(' · ');
+    document.getElementById('prev-meta-photo').textContent = meta;
+    document.getElementById('prev-box-photo').style.display='';
+    setStatusPhoto('ok',`${photoPending.ingredients.length} ingredientes · ${photoPending.steps.length} passos extraídos`);
+    document.getElementById('sbtn').style.display='';
+  } catch(e) {
+    setStatusPhoto('err', e.message || 'Erro ao analisar a imagem.');
+  }
+}
 function saveRecipe() {
   if (!pending) return;
   recipes.unshift(pending);
   save(); renderGrid(); updateBadge();
   const n = pending.name;
+  const r = pending;
   pending=null; closeModal();
   toast(`"${n}" adicionada ao livro!`);
+  cacheImage(r); // async — refreshes card when done
 }
 document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeModal(); });
 document.getElementById('rurl').addEventListener('keydown', e => { if(e.key==='Enter') doFetch(); });
@@ -684,8 +947,9 @@ function renderGrid() {
   }
   g.innerHTML = rs.map(r => {
     const em = emoji(r.category||r.cuisine||'');
-    const imgHTML = r.image
-      ? `<img class="card-img" src="${esc(r.image)}" alt="${esc(r.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-ph" style="display:none">${em}</div>`
+    const imgSrc = r.imageData || r.image;
+    const imgHTML = imgSrc
+      ? `<img class="card-img" src="${esc(imgSrc)}" alt="${esc(r.name)}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="card-img-ph" style="display:none">${em}</div>`
       : `<div class="card-img-ph">${em}</div>`;
     const cat = r.category||r.cuisine||'';
     const meta = [
@@ -709,8 +973,9 @@ function openDetail(id) {
   if (!r) return;
   openId = id;
   const em = emoji(r.category||r.cuisine||'');
-  const imgHTML = r.image
-    ? `<img class="ri-full" src="${esc(r.image)}" alt="${esc(r.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ri-ph" style="display:none">${em}</div>`
+  const detailSrc = r.imageData || r.image;
+  const imgHTML = detailSrc
+    ? `<img class="ri-full" src="${esc(detailSrc)}" alt="${esc(r.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ri-ph" style="display:none">${em}</div>`
     : `<div class="ri-ph">${em}</div>`;
   const cat = r.category||r.cuisine||'';
   const metas = [
@@ -756,11 +1021,28 @@ function closeDetail() {
   document.getElementById('detail').classList.remove('open');
   openId = null;
 }
+function undoDelete() {
+  if (!_undoPending) return;
+  clearTimeout(_toastTimer);
+  const { recipe, position } = _undoPending;
+  _undoPending = null;
+  recipes.splice(position, 0, recipe);
+  save(); renderGrid(); updateBadge();
+  document.getElementById('toast').classList.remove('show');
+  toast(`"${recipe.name}" restaurada.`);
+}
+
 function deleteRecipe(id) {
-  if (!confirm('Remover esta receita do livro?')) return;
-  recipes = recipes.filter(r=>r.id!=id);
+  const idx = recipes.findIndex(r => r.id == id);
+  if (idx < 0) return;
+  const recipe = recipes[idx];
+  // Remove immediately from UI
+  recipes.splice(idx, 1);
   save(); renderGrid(); updateBadge(); closeDetail();
-  toast('Receita removida.');
+  // Cancel any previous pending undo
+  if (_undoPending) localStorage.removeItem(`cookbook-img-${_undoPending.recipe.id}`);
+  _undoPending = { recipe, position: idx };
+  showUndoToast(recipe.name);
 }
 
 // ── SEARCH / FILTER ──
