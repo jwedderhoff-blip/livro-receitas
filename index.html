@@ -411,6 +411,17 @@ a{color:var(--accent);text-decoration:none}
     </div>
     <!-- Text body -->
     <div class="modal-body" id="body-text" style="display:none">
+      <!-- Photo for text tab -->
+      <div style="margin-bottom:16px">
+        <label class="flbl">Foto da receita <span style="font-weight:400;color:var(--ink-3)">(opcional)</span></label>
+        <div id="txt-photo-zone" onclick="document.getElementById('txt-photo-inp').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleTextPhotoDrop(event)" style="border:2px dashed var(--rule);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;transition:border-color var(--ease),background var(--ease);display:flex;align-items:center;justify-content:center;gap:12px;min-height:64px">
+          <input type="file" id="txt-photo-inp" accept="image/*" style="display:none" onchange="handleTextPhoto(this.files[0])">
+          <div id="txt-photo-inner" style="font-size:13px;color:var(--ink-3)">📷 Clique ou arraste para adicionar uma foto</div>
+          <img id="txt-photo-prev" style="display:none;height:52px;border-radius:4px;object-fit:cover">
+          <span id="txt-photo-name" style="display:none;font-size:13px;color:var(--ink-2);flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <button id="txt-photo-rm" style="display:none;flex-shrink:0" class="rm-btn" onclick="event.stopPropagation();clearTextPhoto()">×</button>
+        </div>
+      </div>
       <div style="display:flex;gap:10px">
         <div style="flex:1">
           <label class="flbl" for="txt-name">Nome da receita *</label>
@@ -872,6 +883,7 @@ function resetTextForm() {
   addIngredientRow(); addIngredientRow(); addIngredientRow();
   addStepRow(); addStepRow();
   pending=null;
+  clearTextPhoto();
   document.getElementById('sbtn').style.display='';
 }
 const ING_UNITS = ['','kg','g','mg','L','ml','xícara','col. sopa','col. chá','copo','unidade','fatia','dente','folha','sachê','pitada','a gosto'];
@@ -920,8 +932,36 @@ function buildManualRecipe() {
 }
 // ── PHOTO TAB ──
 let photoPending = null;
+let _capturedPhotoDataUrl = null;
+let _textPhotoDataUrl = null;
+
+async function resizeDataUrl(dataUrl) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 500;
+      const scale = Math.min(1, maxW / img.width);
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL('image/jpeg', 0.80));
+    };
+    img.src = dataUrl;
+  });
+}
+async function savePhotoToStorage(recipe, dataUrl) {
+  try {
+    const resized = await resizeDataUrl(dataUrl);
+    localStorage.setItem(`cookbook-img-${recipe.id}`, resized);
+    recipe.imageData = resized;
+    renderGrid();
+  } catch {}
+}
+
 function resetPhoto() {
   photoPending = null;
+  _capturedPhotoDataUrl = null;
   setStatusPhoto('');
   document.getElementById('prev-box-photo').style.display='none';
   document.getElementById('prev-name-photo').textContent='';
@@ -947,7 +987,7 @@ function handlePhotoFile(file) {
   const reader = new FileReader();
   reader.onload = async ev => {
     const dataUrl = ev.target.result;
-    // show thumb
+    _capturedPhotoDataUrl = dataUrl;
     const img = document.getElementById('photo-prev-img');
     img.src = dataUrl;
     img.style.display = 'block';
@@ -955,6 +995,38 @@ function handlePhotoFile(file) {
     await analysePhoto(dataUrl);
   };
   reader.readAsDataURL(file);
+}
+function handleTextPhotoDrop(e) {
+  e.preventDefault();
+  document.getElementById('txt-photo-zone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) handleTextPhoto(file);
+}
+function handleTextPhoto(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    _textPhotoDataUrl = ev.target.result;
+    document.getElementById('txt-photo-prev').src = _textPhotoDataUrl;
+    document.getElementById('txt-photo-prev').style.display = 'block';
+    document.getElementById('txt-photo-inner').style.display = 'none';
+    document.getElementById('txt-photo-name').textContent = file.name;
+    document.getElementById('txt-photo-name').style.display = 'block';
+    document.getElementById('txt-photo-rm').style.display = 'flex';
+    document.getElementById('txt-photo-zone').style.borderStyle = 'solid';
+    document.getElementById('txt-photo-zone').style.borderColor = 'var(--accent)';
+  };
+  reader.readAsDataURL(file);
+}
+function clearTextPhoto() {
+  _textPhotoDataUrl = null;
+  document.getElementById('txt-photo-prev').style.display = 'none';
+  document.getElementById('txt-photo-inner').style.display = '';
+  document.getElementById('txt-photo-name').style.display = 'none';
+  document.getElementById('txt-photo-rm').style.display = 'none';
+  document.getElementById('txt-photo-zone').style.borderStyle = 'dashed';
+  document.getElementById('txt-photo-zone').style.borderColor = '';
+  document.getElementById('txt-photo-inp').value = '';
 }
 async function analysePhoto(dataUrl) {
   const key = localStorage.getItem(APIKEY_LS);
@@ -1030,9 +1102,14 @@ function saveRecipe() {
   save(); renderGrid(); updateBadge();
   const n = pending.name;
   const r = pending;
-  pending=null; closeModal();
+  const rawImg = _capturedPhotoDataUrl || _textPhotoDataUrl || null;
+  pending = null;
+  _capturedPhotoDataUrl = null;
+  _textPhotoDataUrl = null;
+  closeModal();
   toast(`"${n}" adicionada ao livro!`);
-  cacheImage(r); // async — refreshes card when done
+  if (rawImg) savePhotoToStorage(r, rawImg);
+  else cacheImage(r);
 }
 document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeModal(); });
 document.getElementById('rurl').addEventListener('keydown', e => { if(e.key==='Enter') doFetch(); });
