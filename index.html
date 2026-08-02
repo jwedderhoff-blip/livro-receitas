@@ -397,8 +397,15 @@ function extractImage(img) {
 }
 function extractIngredients(arr) {
   if (!arr) return [];
-  if (Array.isArray(arr)) return arr.map(i => typeof i === 'string' ? i : i.text||i.name||'').filter(Boolean);
-  if (typeof arr === 'string') return arr.split('\n').filter(Boolean);
+  if (Array.isArray(arr)) return arr.map(i => {
+    if (typeof i === 'string') return i.trim();
+    // Some sites put quantity in a separate field
+    const qty = i.requiredQuantity || i.amount || '';
+    const name = i.text || i.name || '';
+    if (qty && name) return `${qty} ${name}`.trim();
+    return (name || qty || '').trim();
+  }).filter(Boolean);
+  if (typeof arr === 'string') return arr.split(/\n|;/).map(s=>s.trim()).filter(Boolean);
   return [];
 }
 function extractInstructions(steps) {
@@ -461,15 +468,31 @@ function parseHTML(html, url) {
   const img = doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
   const desc = doc.querySelector('meta[name="description"]')?.getAttribute('content')||
                doc.querySelector('meta[property="og:description"]')?.getAttribute('content')||'';
+  const norm = s => s.replace(/\s+/g,' ').trim();
   let ingr = [];
-  for (const sel of ['[itemprop="recipeIngredient"]','[class*="ingredient" i]','[class*="Ingredient"]']) {
-    const els = doc.querySelectorAll(sel);
-    if (els.length>1) { ingr = [...els].map(e=>e.textContent.trim()).filter(Boolean); break; }
+  for (const sel of [
+    '[itemprop="recipeIngredient"]',
+    '[class*="ingredient" i]','[class*="ingrediente" i]',
+    '[class*="Ingredient"]',
+    'li[class*="item" i]',
+  ]) {
+    const els = [...doc.querySelectorAll(sel)];
+    if (els.length > 1) {
+      ingr = els.map(e => norm(e.textContent)).filter(s => s.length > 1 && s.length < 300);
+      if (ingr.length > 1) break;
+    }
   }
   let instr = [];
-  for (const sel of ['[itemprop="recipeInstructions"]','[class*="instruction" i]','[class*="direction" i]','[class*="step" i]']) {
-    const els = doc.querySelectorAll(sel);
-    if (els.length>1) { instr = [...els].map(e=>({text:e.textContent.trim()})).filter(s=>s.text.length>8); break; }
+  for (const sel of [
+    '[itemprop="recipeInstructions"]',
+    '[class*="instruction" i]','[class*="preparo" i]','[class*="prepara" i]',
+    '[class*="direction" i]','[class*="step" i]','[class*="passo" i]',
+  ]) {
+    const els = [...doc.querySelectorAll(sel)];
+    if (els.length > 1) {
+      instr = els.map(e => ({text: norm(e.textContent)})).filter(s => s.text.length > 10);
+      if (instr.length > 1) break;
+    }
   }
   return {id:Date.now()+Math.random(),url,name:title,description:desc,image:img,
     ingredients:ingr,instructions:instr,prepTime:null,cookTime:null,totalTime:null,
