@@ -319,6 +319,9 @@ a{color:var(--accent);text-decoration:none}
       <div class="grid" id="grid"></div>
     </section>
 
+    <!-- hidden input for detail photo upload -->
+    <input type="file" id="detail-photo-inp" accept="image/*" style="display:none" onchange="handleDetailPhotoChange(this)">
+
     <!-- ── RECIPE DETAIL ── -->
     <div id="detail">
       <div class="detail-bar">
@@ -1164,10 +1167,22 @@ function openDetail(id) {
   if (!r) return;
   openId = id;
   const em = emoji(r.category||r.cuisine||'');
-  const detailSrc = r.imageData || r.image;
-  const imgHTML = detailSrc
-    ? `<img class="ri-full" src="${esc(detailSrc)}" alt="${esc(r.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="ri-ph" style="display:none">${em}</div>`
-    : `<div class="ri-ph">${em}</div>`;
+  let imgHTML;
+  if (r.imageData) {
+    imgHTML = `<div style="position:relative">
+      <img class="ri-full" src="${esc(r.imageData)}" alt="${esc(r.name)}">
+      <button onclick="triggerDetailPhoto(${r.id})" title="Trocar foto" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);border:none;border-radius:var(--r);padding:5px 9px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;backdrop-filter:blur(4px)">📷 Trocar</button>
+    </div>`;
+  } else if (r.image) {
+    imgHTML = `<div class="ri-ph" style="flex-direction:column;gap:12px">${em}
+      <button id="retry-img-btn" onclick="retryDetailImage(${r.id})" style="font-size:13px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:7px 14px;color:var(--ink-2);cursor:pointer">🔄 Carregar imagem do link</button>
+      <button onclick="triggerDetailPhoto(${r.id})" style="font-size:12px;background:none;border:none;color:var(--ink-3);cursor:pointer;text-decoration:underline">ou enviar uma foto</button>
+    </div>`;
+  } else {
+    imgHTML = `<div class="ri-ph" style="flex-direction:column;gap:10px">${em}
+      <button onclick="triggerDetailPhoto(${r.id})" style="font-size:13px;background:var(--surface);border:1px solid var(--rule);border-radius:var(--r);padding:7px 14px;color:var(--ink-2);cursor:pointer">📷 Adicionar foto</button>
+    </div>`;
+  }
   const cat = r.category||r.cuisine||'';
   const metas = [
     r.prepTime&&`<div class="mc"><div class="ml">Preparo</div><div class="mv">${r.prepTime}</div></div>`,
@@ -1208,6 +1223,35 @@ function openDetail(id) {
   document.getElementById('detail').classList.add('open');
 }
 
+async function retryDetailImage(id) {
+  const r = recipes.find(x=>x.id==id);
+  if (!r || !r.image) return;
+  const btn = document.getElementById('retry-img-btn');
+  if (btn) { btn.textContent='⏳ Carregando…'; btn.disabled=true; }
+  await cacheImage(r);
+  openDetail(id);
+}
+function triggerDetailPhoto(id) {
+  const inp = document.getElementById('detail-photo-inp');
+  inp.dataset.id = id;
+  inp.value = '';
+  inp.click();
+}
+function handleDetailPhotoChange(inp) {
+  const file = inp.files[0];
+  if (!file) return;
+  const id = inp.dataset.id;
+  const r = recipes.find(x=>x.id==id);
+  if (!r) return;
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    await savePhotoToStorage(r, ev.target.result);
+    save();
+    openDetail(id);
+    toast('Foto atualizada!');
+  };
+  reader.readAsDataURL(file);
+}
 function closeDetail() {
   document.getElementById('detail').classList.remove('open');
   openId = null;
