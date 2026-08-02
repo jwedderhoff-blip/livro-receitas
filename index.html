@@ -199,12 +199,12 @@ a{color:var(--accent);text-decoration:none}
 /* ── MODAL ── */
 #overlay{position:fixed;inset:0;background:rgba(15,18,13,.6);z-index:50;display:none;align-items:center;justify-content:center;backdrop-filter:blur(5px);padding:20px}
 #overlay.open{display:flex}
-.modal{background:var(--surface);border-radius:var(--r-lg);width:100%;max-width:500px;box-shadow:0 24px 60px rgba(0,0,0,.28);overflow:hidden}
-.modal-hdr{padding:22px 26px 0;display:flex;align-items:flex-start;justify-content:space-between}
+.modal{background:var(--surface);border-radius:var(--r-lg);width:100%;max-width:500px;box-shadow:0 24px 60px rgba(0,0,0,.28);display:flex;flex-direction:column;max-height:90vh}
+.modal-hdr{padding:22px 26px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0}
 .modal-title{font-family:var(--font-d);font-size:21px;font-weight:normal;color:var(--ink)}
 .modal-sub{font-size:12px;color:var(--ink-3);margin-top:3px}
-.modal-body{padding:20px 26px}
-.modal-foot{padding:0 26px 22px;display:flex;gap:8px;justify-content:flex-end}
+.modal-body{padding:20px 26px;overflow-y:auto;flex:1}
+.modal-foot{padding:14px 26px 22px;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;border-top:1px solid var(--rule)}
 .flbl{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:500;display:block;margin-bottom:6px;font-family:var(--font-u)}
 .finput{width:100%;padding:9px 13px;background:var(--bg);border:1px solid var(--rule);border-radius:var(--r);font-size:14px;color:var(--ink);outline:none;transition:border-color var(--ease)}
 .finput:focus{border-color:var(--accent)}
@@ -874,25 +874,35 @@ function resetTextForm() {
   pending=null;
   document.getElementById('sbtn').style.display='';
 }
+const ING_UNITS = ['','kg','g','mg','L','ml','xícara','col. sopa','col. chá','copo','unidade','fatia','dente','folha','sachê','pitada','a gosto'];
 function addIngredientRow(val='') {
   const row = document.createElement('div');
   row.className='field-row';
-  row.innerHTML=`<input type="text" class="finput" placeholder="Ex: 2 xícaras de farinha de trigo" value="${val.replace(/"/g,'&quot;')}"><button class="rm-btn" onclick="this.parentElement.remove()" title="Remover">×</button>`;
+  const opts = ING_UNITS.map(u=>`<option value="${u}">${u||'—'}</option>`).join('');
+  row.innerHTML=`<input type="text" class="finput ing-qty" placeholder="Qtd" style="width:52px;flex:none;padding-left:8px;padding-right:4px" value="${val.replace(/"/g,'&quot;')}"><select class="finput ing-unit" style="width:108px;flex:none;padding-left:6px">${opts}</select><input type="text" class="finput ing-name" placeholder="Ingrediente" style="flex:1;min-width:0"><button class="rm-btn" onclick="this.parentElement.remove()" title="Remover">×</button>`;
   document.getElementById('ing-list').appendChild(row);
-  row.querySelector('input').focus();
+  row.querySelector('.ing-qty').focus();
 }
 function addStepRow(val='') {
-  const n = document.getElementById('step-list').children.length+1;
   const row = document.createElement('div');
   row.className='field-row';
-  row.innerHTML=`<textarea class="finput" rows="2" placeholder="Passo ${n}: …" style="resize:vertical;margin:0">${val}</textarea><button class="rm-btn" onclick="this.parentElement.remove()" title="Remover">×</button>`;
+  row.innerHTML=`<textarea class="finput" rows="2" placeholder="Descreva este passo…" style="resize:vertical;margin:0">${val}</textarea><button class="rm-btn" onclick="this.parentElement.remove()" title="Remover">×</button>`;
   document.getElementById('step-list').appendChild(row);
   row.querySelector('textarea').focus();
 }
 function buildManualRecipe() {
   const name = document.getElementById('txt-name').value.trim();
   if (!name) { toast('Informe o nome da receita.'); document.getElementById('txt-name').focus(); return null; }
-  const ingredients = [...document.querySelectorAll('#ing-list input')].map(i=>i.value.trim()).filter(Boolean);
+  const ingredients = [...document.querySelectorAll('#ing-list .field-row')].map(row => {
+    const qty  = row.querySelector('.ing-qty').value.trim();
+    const unit = row.querySelector('.ing-unit').value.trim();
+    const ing  = row.querySelector('.ing-name').value.trim();
+    if (!ing) return null;
+    if (unit === 'a gosto') return `${ing} a gosto`;
+    if (qty && unit) return `${qty} ${unit} de ${ing}`;
+    if (qty) return `${qty} ${ing}`;
+    return ing;
+  }).filter(Boolean);
   if (!ingredients.length) { toast('Adicione pelo menos um ingrediente.'); return null; }
   const steps = [...document.querySelectorAll('#step-list textarea')].map(t=>t.value.trim()).filter(Boolean);
   if (!steps.length) { toast('Adicione pelo menos um passo de preparo.'); return null; }
