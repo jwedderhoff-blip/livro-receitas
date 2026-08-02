@@ -852,7 +852,7 @@ async function analysePhoto(dataUrl) {
 {"name":"<nome da receita>","category":"<categoria: Massas, Aves, Carnes, Sobremesas, Sopas, Saladas, Peixes, Bebidas ou Outros>","servings":"<porções, ex: 4 porções>","time":"<tempo de preparo, ex: 30 min>","ingredients":["<item 1>","<item 2>"],"steps":["<passo 1>","<passo 2>"]}
 Se não conseguir identificar uma receita na imagem, retorne: {"error":"Não foi possível identificar uma receita nesta imagem."}`;
     const body = {
-      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+      model: 'llama-3.2-11b-vision-preview',
       messages: [{
         role: 'user',
         content: [
