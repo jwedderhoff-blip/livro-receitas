@@ -223,6 +223,16 @@ a{color:var(--accent);text-decoration:none}
 .mtab{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;font-size:13px;font-weight:500;color:var(--ink-3);border-bottom:2px solid transparent;transition:color var(--ease),border-color var(--ease);margin-bottom:-1px}
 .mtab:hover{color:var(--ink)}
 .mtab.active{color:var(--accent);border-bottom-color:var(--accent)}
+/* ── TEXT FORM ── */
+.field-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:5px}
+.field-row .finput{flex:1;margin:0}
+.rm-btn{flex-shrink:0;width:28px;height:34px;background:none;border:1px solid var(--rule);border-radius:var(--r);color:var(--ink-3);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color var(--ease),border-color var(--ease);padding:0}
+.rm-btn:hover{color:var(--danger,#e05);border-color:var(--danger,#e05)}
+.add-row-btn{font-size:12px;font-weight:600;color:var(--accent);background:none;border:none;cursor:pointer;padding:4px 0;letter-spacing:.02em}
+.add-row-btn:hover{opacity:.8}
+.txt-section{margin-top:14px}
+.txt-section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.txt-section-hdr .flbl{margin:0}
 /* ── DROP ZONE ── */
 #drop-zone{border:2px dashed var(--rule);border-radius:var(--r-lg);padding:28px 20px;text-align:center;cursor:pointer;transition:border-color var(--ease),background var(--ease);min-height:120px;display:flex;align-items:center;justify-content:center;flex-direction:column}
 #drop-zone:hover,#drop-zone.drag-over{border-color:var(--accent);background:var(--accent-bg)}
@@ -370,6 +380,10 @@ a{color:var(--accent);text-decoration:none}
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
         Por foto
       </button>
+      <button class="mtab" id="tab-text" onclick="switchTab('text')">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+        Digitar
+      </button>
     </div>
     <!-- URL body -->
     <div class="modal-body" id="body-url">
@@ -394,6 +408,54 @@ a{color:var(--accent);text-decoration:none}
       </div>
       <div class="fstatus" id="fstatus-photo"></div>
       <div class="preview-box" id="prev-box-photo"><div class="prev-name" id="prev-name-photo"></div><div class="prev-meta" id="prev-meta-photo"></div></div>
+    </div>
+    <!-- Text body -->
+    <div class="modal-body" id="body-text" style="display:none">
+      <div style="display:flex;gap:10px">
+        <div style="flex:1">
+          <label class="flbl" for="txt-name">Nome da receita *</label>
+          <input type="text" class="finput" id="txt-name" placeholder="Ex: Bolo de cenoura">
+        </div>
+        <div style="width:130px">
+          <label class="flbl" for="txt-cat">Categoria</label>
+          <select class="finput" id="txt-cat">
+            <option>Outros</option><option>Massas</option><option>Aves</option><option>Carnes</option>
+            <option>Sobremesas</option><option>Sopas</option><option>Saladas</option>
+            <option>Peixes</option><option>Bebidas</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px">
+        <div style="flex:1">
+          <label class="flbl" for="txt-servings">Porções</label>
+          <input type="text" class="finput" id="txt-servings" placeholder="Ex: 4 porções">
+        </div>
+        <div style="flex:1">
+          <label class="flbl" for="txt-time">Tempo</label>
+          <input type="text" class="finput" id="txt-time" placeholder="Ex: 40 min">
+        </div>
+      </div>
+
+      <div class="txt-section">
+        <div class="txt-section-hdr">
+          <label class="flbl">Ingredientes *</label>
+          <button class="add-row-btn" onclick="addIngredientRow()">+ Adicionar</button>
+        </div>
+        <div id="ing-list"></div>
+      </div>
+
+      <div class="txt-section">
+        <div class="txt-section-hdr">
+          <label class="flbl">Modo de preparo *</label>
+          <button class="add-row-btn" onclick="addStepRow()">+ Adicionar</button>
+        </div>
+        <div id="step-list"></div>
+      </div>
+
+      <div class="txt-section">
+        <label class="flbl">Dicas <span style="font-weight:400;color:var(--ink-3)">(opcional)</span></label>
+        <textarea class="finput" id="txt-tips" rows="2" placeholder="Sugestões, substituições, variações…" style="resize:vertical;margin:0"></textarea>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-g" onclick="closeModal()">Cancelar</button>
@@ -790,16 +852,61 @@ function saveApiKey() {
   document.getElementById('api-panel').style.display='none';
 }
 function switchTab(tab) {
-  document.getElementById('tab-url').classList.toggle('active', tab==='url');
-  document.getElementById('tab-photo').classList.toggle('active', tab==='photo');
-  document.getElementById('body-url').style.display = tab==='url' ? '' : 'none';
-  document.getElementById('body-photo').style.display = tab==='photo' ? '' : 'none';
-  if (tab==='url') {
-    resetFetch();
-    setTimeout(()=>document.getElementById('rurl').focus(),60);
-  } else {
-    resetPhoto();
-  }
+  ['url','photo','text'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('body-'+t).style.display = t===tab ? '' : 'none';
+  });
+  if (tab==='url') { resetFetch(); setTimeout(()=>document.getElementById('rurl').focus(),60); }
+  else if (tab==='photo') resetPhoto();
+  else resetTextForm();
+}
+// ── TEXT FORM ──
+function resetTextForm() {
+  document.getElementById('txt-name').value='';
+  document.getElementById('txt-cat').value='Outros';
+  document.getElementById('txt-servings').value='';
+  document.getElementById('txt-time').value='';
+  document.getElementById('txt-tips').value='';
+  document.getElementById('ing-list').innerHTML='';
+  document.getElementById('step-list').innerHTML='';
+  addIngredientRow(); addIngredientRow(); addIngredientRow();
+  addStepRow(); addStepRow();
+  pending=null;
+  document.getElementById('sbtn').style.display='';
+}
+function addIngredientRow(val='') {
+  const row = document.createElement('div');
+  row.className='field-row';
+  row.innerHTML=`<input type="text" class="finput" placeholder="Ex: 2 xícaras de farinha de trigo" value="${val.replace(/"/g,'&quot;')}"><button class="rm-btn" onclick="this.parentElement.remove()" title="Remover">×</button>`;
+  document.getElementById('ing-list').appendChild(row);
+  row.querySelector('input').focus();
+}
+function addStepRow(val='') {
+  const n = document.getElementById('step-list').children.length+1;
+  const row = document.createElement('div');
+  row.className='field-row';
+  row.innerHTML=`<textarea class="finput" rows="2" placeholder="Passo ${n}: …" style="resize:vertical;margin:0">${val}</textarea><button class="rm-btn" onclick="this.parentElement.remove()" title="Remover">×</button>`;
+  document.getElementById('step-list').appendChild(row);
+  row.querySelector('textarea').focus();
+}
+function buildManualRecipe() {
+  const name = document.getElementById('txt-name').value.trim();
+  if (!name) { toast('Informe o nome da receita.'); document.getElementById('txt-name').focus(); return null; }
+  const ingredients = [...document.querySelectorAll('#ing-list input')].map(i=>i.value.trim()).filter(Boolean);
+  if (!ingredients.length) { toast('Adicione pelo menos um ingrediente.'); return null; }
+  const steps = [...document.querySelectorAll('#step-list textarea')].map(t=>t.value.trim()).filter(Boolean);
+  if (!steps.length) { toast('Adicione pelo menos um passo de preparo.'); return null; }
+  const tips = document.getElementById('txt-tips').value.trim();
+  return {
+    id: Date.now(),
+    name,
+    category: document.getElementById('txt-cat').value,
+    servings: document.getElementById('txt-servings').value.trim(),
+    time: document.getElementById('txt-time').value.trim(),
+    ingredients,
+    steps: tips ? [...steps, `Dicas: ${tips}`] : steps,
+    image:'', url:''
+  };
 }
 // ── PHOTO TAB ──
 let photoPending = null;
@@ -905,6 +1012,9 @@ Se não conseguir identificar uma receita na imagem, retorne: {"error":"Não foi
   }
 }
 function saveRecipe() {
+  if (document.getElementById('tab-text').classList.contains('active')) {
+    pending = buildManualRecipe();
+  }
   if (!pending) return;
   recipes.unshift(pending);
   save(); renderGrid(); updateBadge();
